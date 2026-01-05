@@ -11,39 +11,41 @@ import java.util.Optional;
 
 @RestController
 public class UrlController {
-	
-	private final UrlServices urlServices;
-	
-//	constructor Injection
-	public UrlController (UrlServices urlServices) {
-		this.urlServices = urlServices;
-	}
-	
-//	create short url
-	@PostMapping("/shorten")
-	public ResponseEntity<String> shortenUrl(@RequestBody String OriginalUrl){
-		Url url = urlServices.createShortUrl(OriginalUrl);
-		
-		String shortUrl = "http://localhost:8081/" + url.getShortCode();
-		
-		return ResponseEntity.ok(shortUrl);
-	}
-	
-	@GetMapping("/{shortcode}")
-	public ResponseEntity<Void> redirectToOriginal(@PathVariable String shortCode){
-		Optional<Url> urlOptional = urlServices.getOriginalUrl(shortCode);
-		
-		if(urlOptional.isEmpty()) {
-			return ResponseEntity.notFound().build();
-		}
-		
-		Url url = urlOptional.get();
-		
-		return ResponseEntity
-				.status(HttpStatus.FOUND)
-				.location(URI.create(url.getOriginalUrl()))
-				.build();
-	}
-	
 
+    private final UrlServices urlServices;
+
+    // Constructor Injection
+    public UrlController(UrlServices urlServices) {
+        this.urlServices = urlServices;
+    }
+
+    // Create short URL
+    @PostMapping("/shorten")
+    public ResponseEntity<String> shortenUrl(@RequestBody String originalUrl) {
+
+        Url url = urlServices.createShortUrl(originalUrl);
+        String shortUrl = "http://localhost:8081/" + url.getShortCode();
+
+        return ResponseEntity.ok(shortUrl);
+    }
+
+    // Redirect to original URL
+    @GetMapping("/{shortcode}")
+    public ResponseEntity<Void> redirectToOriginal(
+            @PathVariable("shortcode") String shortCode) {
+
+        Optional<Url> urlOptional = urlServices.getOriginalUrl(shortCode);
+
+        if (urlOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Url url = urlOptional.get();
+
+        return ResponseEntity
+                .status(HttpStatus.FOUND)
+                .location(URI.create(url.getOriginalUrl()))
+                .build();
+    }
 }
+
