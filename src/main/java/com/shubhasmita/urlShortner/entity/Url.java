@@ -23,6 +23,9 @@ public class Url {
 	@Column(name ="expires_at")
 	private LocalDateTime expiresAt;
 	
+	@Column(name ="click_count")
+	private Long clickCount = 0L;
+	
 	public Url(){
 		
 	}
@@ -61,6 +64,13 @@ public class Url {
 	}
 	public void setExpiresAt(LocalDateTime expiresAt) {
 		this.expiresAt = expiresAt;
+	}
+	
+	public Long getClickCount() {
+		return clickCount;
+	}
+	public void setClickCount(Long clickCount) {
+		this.clickCount = clickCount;
 	}
 	
 }

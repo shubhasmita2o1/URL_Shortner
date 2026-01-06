@@ -1,6 +1,7 @@
 package com.shubhasmita.urlShortner.services;
 
 import com.shubhasmita.urlShortner.entity.Url;
+import com.shubhasmita.urlShortner.exception.UrlNotFoundException;
 import com.shubhasmita.urlShortner.repository.UrlRepository;
 import org.springframework.stereotype.Service;
 
@@ -31,25 +32,109 @@ public class UrlServices {
 //		expiration days
 		url.setExpiresAt(LocalDateTime.now().plusDays(15));
 		
+//		click count
+		url.setClickCount(0L);
+		
 		return urlRepository.save(url);
 		
 	}
 	
-//	get original url using short code
-	public Optional<Url> getOriginalUrl(String shortCode){
-		Optional<Url> urlOptional = urlRepository.findByShortCode(shortCode);
-		
-		if(urlOptional.isPresent()) {
-			Url url = urlOptional.get();
-			
-//			check expire
-			if(url.getExpiresAt() != null &&
-					url.getExpiresAt().isBefore(LocalDateTime.now())) {
-				return Optional.empty();
-			}
-		}
-		return urlOptional;
+//	stats
+	
+	public Url getUrlForStats(String shortCode) {
+
+	    Url url = urlRepository.findByShortCode(shortCode)
+	            .orElseThrow(() ->
+	                    new UrlNotFoundException("Short URL not found"));
+
+	    if (url.getExpiresAt() != null &&
+	        url.getExpiresAt().isBefore(LocalDateTime.now())) {
+	        throw new UrlNotFoundException("Short URL has expired");
+	    }
+
+	    return url;
 	}
+
+	
+	
+//	public Optional<Url> getUrlForStats(String shortCode) {
+//
+//	    Optional<Url> urlOptional = urlRepository.findByShortCode(shortCode);
+//
+//	    if (urlOptional.isEmpty()) {
+//	        return Optional.empty();
+//	    }
+//
+//	    Url url = urlOptional.get();
+//
+//	    if (url.getExpiresAt() != null &&
+//	        url.getExpiresAt().isBefore(LocalDateTime.now())) {
+//	        return Optional.empty();
+//	    }
+//
+//	    return Optional.of(url);
+//	}
+
+	
+//	get original url using short code
+	
+	public Url getOriginalUrl(String shortCode) {
+
+	    Url url = urlRepository.findByShortCode(shortCode)
+	            .orElseThrow(() ->
+	                    new UrlNotFoundException("Short URL not found"));
+
+	    if (url.getExpiresAt() != null &&
+	        url.getExpiresAt().isBefore(LocalDateTime.now())) {
+	        throw new UrlNotFoundException("Short URL has expired");
+	    }
+
+	    url.setClickCount(url.getClickCount() + 1);
+	    urlRepository.save(url);
+
+	    return url;
+	}
+
+	
+//	public Optional<Url> getOriginalUrl(String shortCode){
+//		Optional<Url> urlOptional = urlRepository.findByShortCode(shortCode);
+//		
+//		if(urlOptional.isPresent()) {
+//			Url url = urlOptional.get();
+//			
+////			check expire
+//			if(url.getExpiresAt() != null &&
+//					url.getExpiresAt().isBefore(LocalDateTime.now())) {
+//				return Optional.empty();
+//			}
+//		}
+//		
+//		return urlOptional;
+//	}
+	
+//	public Optional<Url> getOriginalUrl(String shortCode) {
+//
+//	    Optional<Url> urlOptional = urlRepository.findByShortCode(shortCode);
+//
+//	    if (urlOptional.isEmpty()) {
+//	        return Optional.empty();
+//	    }
+//
+//	    Url url = urlOptional.get();
+//
+//	    
+//	    if (url.getExpiresAt() != null &&
+//	        url.getExpiresAt().isBefore(LocalDateTime.now())) {
+//	        return Optional.empty();
+//	    }
+//
+//	    // valid redirect → increment click count
+//	    url.setClickCount(url.getClickCount() + 1);
+//	    urlRepository.save(url);
+//
+//	    return Optional.of(url);
+//	}
+
 	
 //	generate short code
 	private String generateShortCode(){
